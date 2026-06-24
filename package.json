@@ -1,0 +1,25 @@
+{
+  "name": "hardhat-v3-hedera-sample",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "hardhat build",
+    "test": "hardhat test",
+    "test:mocha": "hardhat test mocha",
+    "diagnose:relay": "hardhat run scripts/relay-diagnostics.ts --network hederaTestnet",
+    "flow:erc": "hardhat run scripts/erc-testnet-flow.ts --network hederaTestnet",
+    "flow:hts": "hardhat run scripts/hts-testnet-flow.ts --network hederaTestnet",
+    "deploy:erc": "hardhat run scripts/deploy-erc.ts --network hederaTestnet",
+    "deploy:hts": "hardhat run scripts/deploy-hts.ts --network hederaTestnet",
+    "smoke:hedera": "hardhat run scripts/smoke-hedera.ts --network hederaTestnet"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-keystore": "^3.0.0",
+    "@nomicfoundation/hardhat-network-helpers": "^3.0.0",
+    "@nomicfoundation/hardhat-toolbox-mocha-ethers": "^3.0.0",
+    "@openzeppelin/contracts": "^5.0.0",
+    "hardhat": "^3.0.0",
+    "typescript": "^5.0.0"
+  }
+}

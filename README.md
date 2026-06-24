@@ -1,0 +1,81 @@
+# Hardhat v3 + Hedera Sample
+
+This sample demonstrates a Hardhat v3 project for Hedera with:
+
+- a standard ERC-20 deployment path,
+- an HTS-facing Solidity contract that calls the `0x167` system contract,
+- local mocked tests for HTS behavior,
+- Hedera testnet configuration,
+- evidence-producing scripts for manual compatibility testing.
+
+## Install
+
+```bash
+npm install
+```
+
+Hardhat v3 requires a current Node.js runtime. The official docs currently list Node.js `v22.13.0` or later.
+
+## Configure Secrets
+
+Recommended Hardhat v3 keystore flow:
+
+```bash
+npx hardhat keystore set HEDERA_TESTNET_RPC_URL
+npx hardhat keystore set HEDERA_TESTNET_PRIVATE_KEY
+```
+
+For quick local experiments you can also use the variables shown in `.env.example`.
+The local Hardhat config loads `.env` directly, but do not commit private keys.
+
+## Build and Test
+
+```bash
+npm run build
+npm test
+```
+
+The HTS unit test mocks the Hedera `0x167` system contract on the local simulated network. This proves Hardhat compilation and test flow, but it is not a substitute for integration tests on Hedera localnet or testnet.
+
+## Manual Testnet Evidence Flows
+
+```bash
+npm run diagnose:relay
+npm run flow:erc
+npm run flow:hts
+```
+
+Each flow writes a JSON evidence file into `results/`.
+These files are the primary raw material for the compatibility report.
+
+Recommended order:
+
+1. `npm run build`
+2. `npm test`
+3. `npm run diagnose:relay`
+4. `npm run flow:erc`
+5. `npm run flow:hts`
+
+## Simple Deploy Scripts
+
+```bash
+npm run deploy:erc
+npm run deploy:hts
+```
+
+The deploy scripts are useful for quick manual exploration.
+The `flow:*` scripts are better for the report because they also save receipts, addresses, and errors.
+
+## Smoke Test Relay Connectivity
+
+```bash
+npm run smoke:hedera
+```
+
+## Notes
+
+- Use ECDSA Hedera accounts for EVM tooling compatibility.
+- Hashio endpoints are suitable for development and testing, not production.
+- For production, use a commercial relay or self-host the Hiero JSON-RPC relay.
+- Keep ERC tests, mocked HTS tests, and live Hedera integration tests separate so failures are easy to attribute.
+- HTS live calls may fail for Hedera permission, association, fee, or relay reasons. A failed `flow:hts` run is still useful evidence if the error is captured in `results/`.
