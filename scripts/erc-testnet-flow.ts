@@ -2,6 +2,8 @@ import { network } from "hardhat";
 import { normalizeError, writeEvidence } from "./lib/evidence.js";
 
 const startedAt = new Date().toISOString();
+const ERC_DEPLOY_GAS_LIMIT = 2_000_000n;
+const ERC_TRANSFER_GAS_LIMIT = 100_000n;
 
 async function main(): Promise<void> {
   const connection = await network.create();
@@ -16,7 +18,9 @@ async function main(): Promise<void> {
   };
 
   const factory = await ethers.getContractFactory("SampleERC20", deployer);
-  const token = await factory.deploy(deployer.address);
+  const token = await factory.deploy(deployer.address, {
+    gasLimit: ERC_DEPLOY_GAS_LIMIT,
+  });
   await token.waitForDeployment();
 
   const tokenAddress = await token.getAddress();
@@ -35,7 +39,9 @@ async function main(): Promise<void> {
   data.totalSupply = await token.totalSupply();
   data.deployerBalanceAfterDeploy = await token.balanceOf(deployer.address);
 
-  const transferTx = await token.transfer(deployer.address, 1n);
+  const transferTx = await token.transfer(deployer.address, 1n, {
+    gasLimit: ERC_TRANSFER_GAS_LIMIT,
+  });
   const transferReceipt = await transferTx.wait();
 
   data.selfTransfer = {

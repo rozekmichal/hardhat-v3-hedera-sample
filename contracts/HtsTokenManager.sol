@@ -11,10 +11,12 @@ contract HtsTokenManager {
 
     address public immutable treasury;
     address public token;
+    int64 public lastResponseCode;
 
     event TokenCreated(address indexed token, int64 responseCode);
     event TokenMinted(address indexed token, int64 amount, int64 newTotalSupply, int64 responseCode);
     event TokenBurned(address indexed token, int64 amount, int64 newTotalSupply, int64 responseCode);
+    event HtsCallResult(string operation, int64 responseCode, address tokenAddress, int64 newTotalSupply);
 
     error TokenAlreadyCreated();
     error TokenNotCreated();
@@ -27,7 +29,27 @@ contract HtsTokenManager {
         treasury = initialTreasury;
     }
 
+    receive() external payable {}
+
     function createSampleToken() external payable returns (address tokenAddress) {
+        (int64 responseCode, address createdToken) = _createSampleToken();
+
+        if (responseCode != HTS_SUCCESS) {
+            revert HtsResponse("createFungibleToken", responseCode);
+        }
+
+        return createdToken;
+    }
+
+    function createSampleTokenUnchecked()
+        external
+        payable
+        returns (int64 responseCode, address tokenAddress)
+    {
+        return _createSampleToken();
+    }
+
+    function _createSampleToken() internal returns (int64 responseCode, address tokenAddress) {
         if (token != address(0)) {
             revert TokenAlreadyCreated();
         }
@@ -62,50 +84,87 @@ contract HtsTokenManager {
                 })
             });
 
-        int64 responseCode;
-        (responseCode, tokenAddress) = HTS.createFungibleToken{value: msg.value}(
+        (responseCode, tokenAddress) = HTS.createFungibleToken(
             hederaToken,
             1_000_000,
             8
         );
 
-        if (responseCode != HTS_SUCCESS) {
-            revert HtsResponse("createFungibleToken", responseCode);
+        lastResponseCode = responseCode;
+
+        if (responseCode == HTS_SUCCESS) {
+            token = tokenAddress;
+            emit TokenCreated(tokenAddress, responseCode);
         }
 
-        token = tokenAddress;
-        emit TokenCreated(tokenAddress, responseCode);
+        emit HtsCallResult("createFungibleToken", responseCode, tokenAddress, 0);
     }
 
     function mint(int64 amount) external returns (int64 newTotalSupply) {
-        if (token == address(0)) {
-            revert TokenNotCreated();
-        }
-
-        int64 responseCode;
-        int64[] memory serialNumbers;
-        (responseCode, newTotalSupply, serialNumbers) = HTS.mintToken(token, amount, new bytes[](0));
-        serialNumbers;
+        (int64 responseCode, int64 totalSupply) = _mint(amount);
 
         if (responseCode != HTS_SUCCESS) {
             revert HtsResponse("mintToken", responseCode);
         }
 
-        emit TokenMinted(token, amount, newTotalSupply, responseCode);
+        return totalSupply;
     }
 
-    function burn(int64 amount) external returns (int64 newTotalSupply) {
+    function mintUnchecked(int64 amount)
+        external
+        returns (int64 responseCode, int64 newTotalSupply)
+    {
+        return _mint(amount);
+    }
+
+    function _mint(int64 amount) internal returns (int64 responseCode, int64 newTotalSupply) {
         if (token == address(0)) {
             revert TokenNotCreated();
         }
 
-        int64 responseCode;
-        (responseCode, newTotalSupply) = HTS.burnToken(token, amount, new int64[](0));
+        int64[] memory serialNumbers;
+        (responseCode, newTotalSupply, serialNumbers) = HTS.mintToken(token, amount, new bytes[](0));
+        serialNumbers;
+
+        lastResponseCode = responseCode;
+
+        if (responseCode == HTS_SUCCESS) {
+            emit TokenMinted(token, amount, newTotalSupply, responseCode);
+        }
+
+        emit HtsCallResult("mintToken", responseCode, token, newTotalSupply);
+    }
+
+    function burn(int64 amount) external returns (int64 newTotalSupply) {
+        (int64 responseCode, int64 totalSupply) = _burn(amount);
 
         if (responseCode != HTS_SUCCESS) {
             revert HtsResponse("burnToken", responseCode);
         }
 
-        emit TokenBurned(token, amount, newTotalSupply, responseCode);
+        return totalSupply;
+    }
+
+    function burnUnchecked(int64 amount)
+        external
+        returns (int64 responseCode, int64 newTotalSupply)
+    {
+        return _burn(amount);
+    }
+
+    function _burn(int64 amount) internal returns (int64 responseCode, int64 newTotalSupply) {
+        if (token == address(0)) {
+            revert TokenNotCreated();
+        }
+
+        (responseCode, newTotalSupply) = HTS.burnToken(token, amount, new int64[](0));
+
+        lastResponseCode = responseCode;
+
+        if (responseCode == HTS_SUCCESS) {
+            emit TokenBurned(token, amount, newTotalSupply, responseCode);
+        }
+
+        emit HtsCallResult("burnToken", responseCode, token, newTotalSupply);
     }
 }
