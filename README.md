@@ -18,15 +18,28 @@ Hardhat v3 requires a current Node.js runtime. The official docs currently list 
 
 ## Configure Secrets
 
-Recommended Hardhat v3 keystore flow:
+For this lab, create a local `.env` file from the committed template:
+
+```bash
+cp .env.example .env
+```
+
+Then set:
+
+```bash
+HEDERA_TESTNET_RPC_URL=https://testnet.hashio.io/api
+HEDERA_TESTNET_PRIVATE_KEY=0x...
+```
+
+The local Hardhat config loads `.env` directly, but `.env` is ignored by Git.
+Do not commit private keys.
+
+You can also store the same values with the Hardhat v3 keystore:
 
 ```bash
 npx hardhat keystore set HEDERA_TESTNET_RPC_URL
 npx hardhat keystore set HEDERA_TESTNET_PRIVATE_KEY
 ```
-
-For quick local experiments you can also use the variables shown in `.env.example`.
-The local Hardhat config loads `.env` directly, but do not commit private keys.
 
 ## Build and Test
 
@@ -35,7 +48,7 @@ npm run build
 npm test
 ```
 
-The HTS unit test mocks the Hedera `0x167` system contract on the local simulated network. This proves Hardhat compilation and test flow, but it is not a substitute for integration tests on Hedera localnet or testnet.
+The HTS unit test mocks the Hedera `0x167` system contract on the local simulated network. This proves Hardhat compilation and test flow, but it is not a substitute for integration tests on Hedera testnet.
 
 ## Manual Testnet Evidence Flows
 
