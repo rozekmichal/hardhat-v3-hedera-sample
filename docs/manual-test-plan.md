@@ -52,7 +52,8 @@ npm run flow:hts
 Purpose:
 
 - deploys `HtsTokenManager` to Hedera testnet,
-- calls `createSampleToken()` through `0x167`,
+- calls `createSampleTokenUnchecked()` through `0x167`,
+- sends HBAR value with the token creation call so the manager can forward `msg.value` to the HTS system contract,
 - attempts a mint through the manager,
 - records success receipts or the exact relay/HTS error.
 

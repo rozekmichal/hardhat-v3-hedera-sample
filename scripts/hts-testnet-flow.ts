@@ -6,7 +6,8 @@ const HTS_MANAGER_DEPLOY_GAS_LIMIT = 2_000_000n;
 const DEFAULT_HTS_CREATE_TOKEN_GAS_LIMIT = 15_000_000n;
 const DEFAULT_HTS_CREATE_TOKEN_GAS_PRICE_WEIBAR = 10_000_000_000_000n;
 const HTS_MINT_GAS_LIMIT = 1_000_000n;
-const DEFAULT_HTS_MANAGER_FUNDING_HBAR = "20";
+const DEFAULT_HTS_CREATE_TOKEN_VALUE_HBAR = "50";
+const DEFAULT_HTS_MANAGER_FUNDING_HBAR = "0";
 
 async function main(): Promise<void> {
   const connection = await network.create();
@@ -30,13 +31,17 @@ async function main(): Promise<void> {
   const managerFunding = ethers.parseEther(
     process.env.HEDERA_HTS_MANAGER_FUNDING_HBAR ?? DEFAULT_HTS_MANAGER_FUNDING_HBAR,
   );
+  const createTokenValue = ethers.parseEther(
+    process.env.HEDERA_HTS_CREATE_TOKEN_VALUE_HBAR ?? DEFAULT_HTS_CREATE_TOKEN_VALUE_HBAR,
+  );
 
   data.createTokenGasLimit = createTokenGasLimit;
   data.createTokenGasPrice = createTokenGasPrice;
+  data.createTokenValue = createTokenValue;
   data.managerFunding = managerFunding;
 
   const factory = await ethers.getContractFactory("HtsTokenManager", deployer);
-  const manager = await factory.deploy(deployer.address, {
+  const manager = await factory.deploy(ethers.ZeroAddress, {
     gasLimit: HTS_MANAGER_DEPLOY_GAS_LIMIT,
   });
   await manager.waitForDeployment();
@@ -78,6 +83,7 @@ async function main(): Promise<void> {
   const createTx = await manager.createSampleTokenUnchecked({
     gasLimit: createTokenGasLimit,
     gasPrice: createTokenGasPrice,
+    value: createTokenValue,
   });
   data.createSampleTokenRequest = {
     hash: createTx.hash,

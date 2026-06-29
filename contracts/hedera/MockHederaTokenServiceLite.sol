@@ -7,6 +7,8 @@ contract MockHederaTokenServiceLite is IHederaTokenServiceLite {
     int64 private constant HTS_SUCCESS = 22;
 
     address public nextToken = address(0x1234);
+    address public lastTreasury;
+    uint256 public lastValue;
     int64 public totalSupply;
 
     event MockTokenCreated(address indexed treasury, address indexed token);
@@ -20,6 +22,8 @@ contract MockHederaTokenServiceLite is IHederaTokenServiceLite {
         int64 initialTotalSupply,
         int32
     ) external payable returns (int64 responseCode, address tokenAddress) {
+        lastTreasury = token.treasury;
+        lastValue = msg.value;
         totalSupply = initialTotalSupply;
         tokenAddress = nextToken;
         emit MockTokenCreated(token.treasury, tokenAddress);

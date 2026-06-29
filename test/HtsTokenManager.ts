@@ -23,11 +23,14 @@ describe("HtsTokenManager", async function () {
     await htsMockAtSystemAddress.setNextToken("0x0000000000000000000000000000000000001234");
 
     const managerFactory = await ethers.getContractFactory("HtsTokenManager");
-    const manager = await managerFactory.deploy(deployer.address);
+    const manager = await managerFactory.deploy(ethers.ZeroAddress);
     await manager.waitForDeployment();
+    const managerAddress = await manager.getAddress();
 
-    await manager.createSampleToken();
+    await manager.createSampleToken({ value: ethers.parseEther("1") });
     assert.equal(await manager.token(), "0x0000000000000000000000000000000000001234");
+    assert.equal(await htsMockAtSystemAddress.lastTreasury(), managerAddress);
+    assert.equal(await htsMockAtSystemAddress.lastValue(), ethers.parseEther("1"));
 
     await manager.mint(500);
     await manager.burn(100);

@@ -8,7 +8,7 @@ async function main(): Promise<void> {
   console.log("Deploying HtsTokenManager with:", deployer.address);
 
   const factory = await ethers.getContractFactory("HtsTokenManager", deployer);
-  const manager = await factory.deploy(deployer.address, {
+  const manager = await factory.deploy(ethers.ZeroAddress, {
     gasLimit: HTS_MANAGER_DEPLOY_GAS_LIMIT,
   });
   await manager.waitForDeployment();

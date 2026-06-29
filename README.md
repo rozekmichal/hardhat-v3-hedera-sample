@@ -31,14 +31,16 @@ HEDERA_TESTNET_RPC_URL=https://testnet.hashio.io/api
 HEDERA_TESTNET_PRIVATE_KEY=0x...
 HEDERA_HTS_CREATE_TOKEN_GAS_LIMIT=15000000
 HEDERA_HTS_CREATE_TOKEN_GAS_PRICE_WEIBAR=10000000000000
-HEDERA_HTS_MANAGER_FUNDING_HBAR=20
+HEDERA_HTS_CREATE_TOKEN_VALUE_HBAR=50
+HEDERA_HTS_MANAGER_FUNDING_HBAR=0
 ```
 
 The local Hardhat config loads `.env` directly, but `.env` is ignored by Git.
 Do not commit private keys.
 `HEDERA_HTS_CREATE_TOKEN_GAS_LIMIT` controls the max fee budget for the HTS token creation system-contract call.
 `HEDERA_HTS_CREATE_TOKEN_GAS_PRICE_WEIBAR` sets an explicit gas price for the HTS token creation call.
-`HEDERA_HTS_MANAGER_FUNDING_HBAR` funds the deployed HTS manager before it calls the HTS system contract.
+`HEDERA_HTS_CREATE_TOKEN_VALUE_HBAR` sends HBAR value with the HTS token creation call, matching the official HTS wrapper pattern that forwards `msg.value` to the `0x167` system contract.
+`HEDERA_HTS_MANAGER_FUNDING_HBAR` optionally funds the deployed HTS manager before it calls the HTS system contract. The default is `0`; this is a diagnostic parameter, not the primary create-token fee path.
 
 You can also store the same values with the Hardhat v3 keystore:
 
@@ -96,5 +98,6 @@ npm run smoke:hedera
 - Use ECDSA Hedera accounts for EVM tooling compatibility.
 - Hashio endpoints are suitable for development and testing, not production.
 - For production, use a commercial relay or self-host the Hiero JSON-RPC relay.
+- The HTS manager uses itself as the default treasury when deployed with `address(0)`, which matches the official token-create examples more closely than using an external EOA treasury.
 - Keep ERC tests, mocked HTS tests, and live Hedera integration tests separate so failures are easy to attribute.
 - HTS live calls may fail for Hedera permission, association, fee, or relay reasons. A failed `flow:hts` run is still useful evidence if the error is captured in `results/`.

@@ -24,9 +24,10 @@ contract HtsTokenManager {
 
     int64 private constant HTS_SUCCESS = 22;
     uint private constant TOKEN_KEY_SUPPLY = 16;
+    int64 private constant DEFAULT_AUTO_RENEW_PERIOD = 8_000_000;
 
     constructor(address initialTreasury) {
-        treasury = initialTreasury;
+        treasury = initialTreasury == address(0) ? address(this) : initialTreasury;
     }
 
     receive() external payable {}
@@ -79,12 +80,12 @@ contract HtsTokenManager {
                 tokenKeys: tokenKeys,
                 expiry: IHederaTokenServiceLite.Expiry({
                     second: 0,
-                    autoRenewAccount: address(0),
-                    autoRenewPeriod: 0
+                    autoRenewAccount: treasury,
+                    autoRenewPeriod: DEFAULT_AUTO_RENEW_PERIOD
                 })
             });
 
-        (responseCode, tokenAddress) = HTS.createFungibleToken(
+        (responseCode, tokenAddress) = HTS.createFungibleToken{value: msg.value}(
             hederaToken,
             1_000_000,
             8
