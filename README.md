@@ -14,7 +14,7 @@ This sample demonstrates a Hardhat v3 project for Hedera with:
 npm install
 ```
 
-Hardhat v3 requires a current Node.js runtime. The official docs currently list Node.js `v22.13.0` or later.
+Hardhat v3 requires a current Node.js runtime compatible with the official Hardhat v3 requirements. Check the Hardhat documentation if your local Node.js version is older or non-LTS.
 
 ## Configure Secrets
 
